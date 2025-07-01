@@ -1,12 +1,9 @@
-const express = require('express');
-const fetch = require('node-fetch');
-const app = express();
+const fetch = require("node-fetch");
 
-app.use(express.json());
-
-app.all('/', async (req, res) => {
-  const prompt = req.method === 'GET' ? req.query.text : req.body.prompt;
-  const model = (req.method === 'GET' ? req.query.model : req.body.model || 'gemini').toLowerCase();
+module.exports = async (req, res) => {
+  const isGET = req.method === 'GET';
+  const prompt = isGET ? req.query.text : req.body.prompt;
+  const model = (isGET ? req.query.model : req.body.model || 'gemini').toLowerCase();
 
   if (!prompt) {
     return res.json({ error: 'Prompt is required. Use ?text=your+question' });
@@ -37,10 +34,8 @@ app.all('/', async (req, res) => {
       body: JSON.stringify(payload)
     });
     const result = await response.json();
-    res.json(result);
+    return res.status(200).json(result);
   } catch (err) {
-    res.json({ error: 'API Error', details: err.message });
+    return res.status(500).json({ error: 'API Error', details: err.message });
   }
-});
-
-module.exports = app;
+};
